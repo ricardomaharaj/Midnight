@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { useState, useEffect } from 'preact/hooks'
+import all from './all.json'
+import post from './post.json'
 
 const Reddit = {
     getPosts: async function (sub) {
@@ -13,54 +14,62 @@ const Reddit = {
 }
 
 export function App() {
-
-    let [sub, setSub] = useState('all')
-    let [posts, setPosts] = useState()
-    let [post, setPost] = useState()
-
-    useEffect(() => {
-        Reddit.getPosts(sub).then(x => setPosts(x))
-    }, [sub])
-
     return <>
         <div className='row'>
             <div className='col'>
-                <div className='row'>
-                    <span>r/</span><input type='text' defaultValue={sub} onKeyDown={e => e.key == 'Enter' ? setSub(e.currentTarget.value) : null} />
-                </div>
-                {posts?.data?.children?.map(x =>
-                    <div className='row' onClick={() => Reddit.getPost(x?.data?.permalink).then(x => setPost(x))} >
-                        <div className='col'>
-                            <img src={x?.data?.thumbnail} alt='' />
-                        </div>
-                        <div className='col'>
-                            <div className='row'>
-                                <div> {x?.data?.title} </div>
-                            </div>
-                            <div className='row'>
-                                <div> r/{x?.data?.subreddit} </div>
-                                <div> u/{x?.data?.author} </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <Kind data={all.data} kind={all.kind} />
             </div>
             <div className='col'>
-                {post?.[1]?.data?.children?.map(x =>
-                    <Comment data={x?.data} indent={2} />
-                )}
+                <Kind kind={post?.[1]?.kind} data={post?.[1]?.data} />
             </div>
         </div>
     </>
 }
 
-function Comment({ data, indent }) {
+function Kind({ kind, data }) {
+    switch (kind) {
+        case 'Listing':
+            return <Listing data={data} />
+        case 't1':
+            return <Comment data={data} />
+        case 't3':
+            return <Post data={data} />
+        default:
+            return <></>
+    }
+}
+
+function Listing({ data }) {
     return <>
-        <div style={{ marginLeft: indent + 2 }}> {data?.body} </div>
-        {data?.replies && <>
-            <div>
-                <Comment data={data?.replies?.data} indent={indent + 2} />
+        {data?.children?.map(x => <Kind data={x?.data} kind={x?.kind} />)}
+    </>
+}
+
+function Post({ data }) {
+    return <>
+        <div className='row'>
+            <div className='col'>
+                <img src={data?.thumbnail} alt='' />
             </div>
-        </>}
+            <div className='col'>
+                <div className='row'>
+                    <div> {data?.title} </div>
+                </div>
+                <div className='row'>
+                    <div> r/{data?.subreddit} </div>
+                    <div> u/{data?.author} </div>
+                </div>
+            </div>
+        </div>
+    </>
+}
+
+function Comment({ data }) {
+    return <>
+        <div>
+            <div> u/{data?.author} </div>
+            <div> {data?.body} </div>
+            {data?.replies && <Kind data={data?.replies?.data} kind={data?.replies?.kind} />}
+        </div>
     </>
 }

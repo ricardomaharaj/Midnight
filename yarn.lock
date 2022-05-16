@@ -338,9 +338,9 @@ browserslist@^4.20.2:
     picocolors "^1.0.0"
 
 caniuse-lite@^1.0.30001332:
-  version "1.0.30001340"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001340.tgz#029a2f8bfc025d4820fafbfaa6259fd7778340c7"
-  integrity sha512-jUNz+a9blQTQVu4uFcn17uAD8IDizPzQkIKh3LCJfg9BkyIqExYYdyc/ZSlWUSKb8iYiXxKsxbv4zYSvkqjrxw==
+  version "1.0.30001341"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001341.tgz#59590c8ffa8b5939cf4161f00827b8873ad72498"
+  integrity sha512-2SodVrFFtvGENGCv0ChVJIDQ0KPaS1cg7/qtfMaICgeMolDdo/Z2OD32F0Aq9yl6F4YFwGPBS5AaPqNYiW4PoA==
 
 chalk@^2.0.0:
   version "2.4.2"
@@ -674,9 +674,9 @@ resolve@^1.20.0, resolve@^1.22.0:
     supports-preserve-symlinks-flag "^1.0.0"
 
 rollup@^2.59.0:
-  version "2.72.1"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.72.1.tgz#861c94790537b10008f0ca0fbc60e631aabdd045"
-  integrity sha512-NTc5UGy/NWFGpSqF1lFY8z9Adri6uhyMLI6LvPAXdBKoPRFhIIiBUpt+Qg2awixqO3xvzSijjhnb4+QEZwJmxA==
+  version "2.73.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-2.73.0.tgz#128fef4b333fd92d02d6929afbb6ee38d7feb32d"
+  integrity sha512-h/UngC3S4Zt28mB3g0+2YCMegT5yoftnQplwzPqGZcKvlld5e+kT/QRmJiL+qxGyZKOYpgirWGdLyEO1b0dpLQ==
   optionalDependencies:
     fsevents "~2.3.2"
 
