@@ -1,23 +1,31 @@
 import axios from 'axios'
-import all from './all.json'
-import post from './post.json'
+import { useEffect, useState } from 'react'
 
 const Reddit = {
-    getPosts: async function (sub) {
+    getPosts: async function (sub: string) {
         let x = await axios.get(`https://www.reddit.com/r/${sub}.json`, { params: { raw_json: 1 } })
         return x.data
     },
-    getPost: async function (url) {
+    getPost: async function (url: string) {
         let x = await axios.get(`https://www.reddit.com/${url}.json`, { params: { raw_json: 1 } })
         return x.data
     }
 }
 
 export function App() {
+
+    let [posts, setPosts] = useState<any>()
+
+    let [post, setPost] = useState<any>()
+
+    useEffect(() => {
+        Reddit.getPosts('all').then(x => setPosts(x))
+    })
+    
     return <>
         <div className='row'>
             <div className='col'>
-                <Kind data={all.data} kind={all.kind} />
+                <Kind data={posts.data} kind={posts.kind} />
             </div>
             <div className='col'>
                 <Kind kind={post?.[1]?.kind} data={post?.[1]?.data} />
@@ -26,7 +34,7 @@ export function App() {
     </>
 }
 
-function Kind({ kind, data }) {
+function Kind({ kind, data }: any) {
     switch (kind) {
         case 'Listing':
             return <Listing data={data} />
@@ -39,13 +47,13 @@ function Kind({ kind, data }) {
     }
 }
 
-function Listing({ data }) {
+function Listing({ data }: any) {
     return <>
         {data?.children?.map(x => <Kind data={x?.data} kind={x?.kind} />)}
     </>
 }
 
-function Post({ data }) {
+function Post({ data }: any) {
     return <>
         <div className='row'>
             <div className='col'>
@@ -64,7 +72,7 @@ function Post({ data }) {
     </>
 }
 
-function Comment({ data }) {
+function Comment({ data }: any) {
     return <>
         <div>
             <div> u/{data?.author} </div>
