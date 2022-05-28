@@ -4,11 +4,11 @@ import { BrowserRouter, Link, Route, Routes, useParams } from 'react-router-dom'
 
 const Reddit = {
     getPosts: async function (sub: string) {
-        let x = await axios.get(`https://www.reddit.com/r/${sub}/top.json`, { params: { raw_json: 1 } })
+        let x = await axios.get(`https://www.reddit.com/r/${sub}.json`, { params: { raw_json: 1 } })
         return x.data
     },
     getPost: async function (url: string) {
-        let x = await axios.get(`https://www.reddit.com/${url}.json`, { params: { raw_json: 1, sort: 'top' } })
+        let x = await axios.get(`https://www.reddit.com/${url}.json`, { params: { raw_json: 1 } })
         return x.data
     }
 }
@@ -46,7 +46,7 @@ function Subreddit() {
 
     let { sub } = useParams()
     let [posts, setPosts] = useState<any>()
-    useEffect(() => { Reddit.getPosts(sub || 'all').then(x => setPosts(x)) }, [])
+    useEffect(() => { Reddit.getPosts(sub || 'all').then(x => setPosts(x)) }, [sub])
 
     return <>
         <div className='flex flex-row'>
@@ -103,7 +103,7 @@ function Comment({ data }: any) {
                 <div> u/{data?.author} </div>
                 <div className='text-sm'> {data?.score} </div>
             </div>
-            <div className='hover:text-xl' onClick={() => setFold(!fold)}> {data?.body} </div>
+            <div onClick={() => setFold(!fold)}> {data?.body} </div>
             {(data?.replies && !fold) && <Kind data={data?.replies?.data} kind={data?.replies?.kind} />}
         </div>
     </>
