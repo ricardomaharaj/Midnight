@@ -16,7 +16,10 @@ const Reddit = {
 export function App() {
     return <>
         <BrowserRouter>
-            <div className='container mx-auto my-2 space-y-2'>
+            <div className='container mx-auto'>
+                <div className='p-8 text-center text-2xl'>
+                    <div> Rapid Reddit </div>
+                </div>
                 <Routes>
                     <Route path='/' element={<Subreddit />} />
                     <Route path='/r/:sub' element={<Subreddit />} />
@@ -31,6 +34,7 @@ function ViewPost() {
 
     let { sub, id, path } = useParams()
     let [post, setPost] = useState<any>()
+
     useEffect(() => {
         Reddit.getPost(`r/${sub}/comments/${id}/${path}`).then(x => setPost(x))
     }, [])
@@ -47,15 +51,14 @@ function Subreddit() {
 
     let { sub } = useParams()
     let [posts, setPosts] = useState<any>()
+
     useEffect(() => {
         Reddit.getPosts(sub || 'all').then(x => setPosts(x))
     }, [sub])
 
     return <>
-        <div className='row'>
-            <div className='col space-y-2'>
-                <Kind data={posts?.data} kind={posts?.kind} />
-            </div>
+        <div className='col space-y-2'>
+            <Kind data={posts?.data} kind={posts?.kind} />
         </div>
     </>
 }
@@ -81,16 +84,16 @@ function Listing({ data }: any) {
 
 function Post({ data }: any) {
     return <>
-        <div className='row space-x-2 hover:text-red-400'>
+        <div className='row bg-stone-800 rounded-xl p-4 space-x-2'>
             <div className='col'>
                 <img src={data?.thumbnail} alt='' />
             </div>
             <div className='col'>
                 <div className='row'>
-                    <Link className='hover:text-blue-400' to={`${data?.permalink}`}> {data?.title} </Link>
+                    <Link to={`${data?.permalink}`}> {data?.title} </Link>
                 </div>
                 <div className='row space-x-2'>
-                    <Link className='hover:text-blue-400' to={`/r/${data?.subreddit}`}> r/{data?.subreddit} </Link>
+                    <Link to={`/r/${data?.subreddit}`}> r/{data?.subreddit} </Link>
                     <div> u/{data?.author} </div>
                 </div>
             </div>
@@ -99,9 +102,11 @@ function Post({ data }: any) {
 }
 
 function Comment({ data }: any) {
+
     let [fold, setFold] = useState<boolean>(false)
+
     return <>
-        <div className='m-2 border-l-[0.5px] border-white pl-2 hover:border-red-400'>
+        <div className='m-2 border-l-[0.5px] border-white pl-2 '>
             <div className='row space-x-2'>
                 <div> u/{data?.author} </div>
                 <div className='text-sm'> {data?.score} </div>

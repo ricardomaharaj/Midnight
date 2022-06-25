@@ -17,5 +17,5 @@
 }
 
 body {
-    @apply bg-black text-white
+    @apply bg-stone-900 text-white
 }
