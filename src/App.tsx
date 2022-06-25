@@ -4,7 +4,7 @@ import { BrowserRouter, Link, Route, Routes, useParams } from 'react-router-dom'
 
 const Reddit = {
     getPosts: async function (sub: string) {
-        let x = await axios.get(`https://www.reddit.com/r/${sub}/top.json`, { params: { raw_json: 1 } })
+        let x = await axios.get(`https://www.reddit.com/r/${sub}/top.json`, { params: { raw_json: 1, t: 'week' } })
         return x.data
     },
     getPost: async function (url: string) {
@@ -16,10 +16,10 @@ const Reddit = {
 export function App() {
     return <>
         <BrowserRouter>
-            <div className='container mx-auto'>
-                <div className='p-8 text-center text-2xl'>
+            <div className='col xl:mx-96'>
+                <Link to='/' className='p-8 text-center text-2xl'>
                     <div> Rapid Reddit </div>
-                </div>
+                </Link>
                 <Routes>
                     <Route path='/' element={<Subreddit />} />
                     <Route path='/r/:sub' element={<Subreddit />} />
@@ -57,7 +57,7 @@ function Subreddit() {
     }, [sub])
 
     return <>
-        <div className='col space-y-2'>
+        <div className='col'>
             <Kind data={posts?.data} kind={posts?.kind} />
         </div>
     </>
@@ -84,20 +84,17 @@ function Listing({ data }: any) {
 
 function Post({ data }: any) {
     return <>
-        <div className='row bg-stone-800 rounded-xl p-4 space-x-2'>
+        <Link to={data?.permalink} className='row bg-stone-800 p-4'>
             <div className='col'>
-                <img src={data?.thumbnail} alt='' />
-            </div>
-            <div className='col'>
-                <div className='row'>
-                    <Link to={`${data?.permalink}`}> {data?.title} </Link>
-                </div>
-                <div className='row space-x-2'>
-                    <Link to={`/r/${data?.subreddit}`}> r/{data?.subreddit} </Link>
+                <div className='row text-stone-400 space-x-2'>
+                    <div> r/{data?.subreddit} </div>
                     <div> u/{data?.author} </div>
                 </div>
+                <div className='row'>
+                    <div> {data?.title} </div>
+                </div>
             </div>
-        </div>
+        </Link>
     </>
 }
 
@@ -106,12 +103,14 @@ function Comment({ data }: any) {
     let [fold, setFold] = useState<boolean>(false)
 
     return <>
-        <div className='m-2 border-l-[0.5px] border-white pl-2 '>
-            <div className='row space-x-2'>
-                <div> u/{data?.author} </div>
-                <div className='text-sm'> {data?.score} </div>
+        <div className='bg-stone-800 border-l-[0.5px] border-stone-400 pl-2'>
+            <div className='p-2'>
+                <div className='row text-stone-400 text-sm space-x-2'>
+                    <div> u/{data?.author} </div>
+                    <div> {data?.score} </div>
+                </div>
+                <div onClick={() => setFold(!fold)}> {data?.body} </div>
             </div>
-            <div onClick={() => setFold(!fold)}> {data?.body} </div>
             {(data?.replies && !fold) && <Kind data={data?.replies?.data} kind={data?.replies?.kind} />}
         </div>
     </>
