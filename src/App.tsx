@@ -1,64 +1,102 @@
-import axios from 'axios'
 import { useEffect, useState } from 'react'
 import { BrowserRouter, Link, Route, Routes, useParams } from 'react-router-dom'
+import { Reddit } from './Reddit'
+import MarkDown from 'react-markdown'
 
-const Reddit = {
-    getPosts: async function (sub: string) {
-        let x = await axios.get(`https://www.reddit.com/r/${sub}/top.json`, { params: { raw_json: 1, t: 'week' } })
-        return x.data
-    },
-    getPost: async function (url: string) {
-        let x = await axios.get(`https://www.reddit.com/${url}.json`, { params: { raw_json: 1, sort: 'top' } })
-        return x.data
-    }
+type GlobalState = {
+    selected_subreddit: string
+    subreddit_sort: string
+    subreddit_sort_range: string,
+    post_sort: string,
+    selected_subreddit_posts?: any[]
+}
+
+type Props = {
+    state: GlobalState
+    updateState: (update: Partial<GlobalState>) => void
 }
 
 export function App() {
+
+    let [state, setState] = useState<GlobalState>({
+        selected_subreddit: 'askreddit',
+        post_sort: 'top',
+        subreddit_sort: 'top',
+        subreddit_sort_range: 'week'
+    })
+
+    let updateState = (update: Partial<GlobalState>) => { setState({ ...state, ...update }) }
+
     return <>
         <BrowserRouter>
-            <div className='col xl:mx-96'>
+            <div className='container mx-auto'>
                 <Link to='/' className='p-8 text-center text-2xl'>
                     <div> Rapid Reddit </div>
                 </Link>
                 <Routes>
-                    <Route path='/' element={<Subreddit />} />
-                    <Route path='/r/:sub' element={<Subreddit />} />
-                    <Route path='/r/:sub/comments/:id/:path' element={<ViewPost />} />
+                    <Route path='/' element={<Subreddit state={state} updateState={updateState} />} />
+                    <Route path='/:permalink' element={<ViewPost state={state} updateState={updateState} />} />
                 </Routes>
             </div>
         </BrowserRouter>
     </>
 }
 
-function ViewPost() {
-
-    let { sub, id, path } = useParams()
-    let [post, setPost] = useState<any>()
+function Subreddit({ state, updateState }: Props) {
 
     useEffect(() => {
-        Reddit.getPost(`r/${sub}/comments/${id}/${path}`).then(x => setPost(x))
-    }, [])
+        Reddit.subreddit(
+            state.selected_subreddit,
+            state.subreddit_sort,
+            state.subreddit_sort_range
+        ).then(x => updateState({ selected_subreddit_posts: x }))
+    }, [
+        state.selected_subreddit,
+        state.subreddit_sort,
+        state.subreddit_sort_range
+    ])
 
     return <>
         <div className='col'>
-            <Kind kind={post?.[0]?.kind} data={post?.[0]?.data} />
-            <Kind kind={post?.[1]?.kind} data={post?.[1]?.data} />
+            <div className='row'>
+                <input type='text' defaultValue={state.selected_subreddit} onKeyDown={
+                    e => e.key === 'Enter' ? updateState({ selected_subreddit: e.currentTarget.value }) : null
+                } />
+                <select defaultValue={state.subreddit_sort} onChange={e => updateState({ subreddit_sort: e.currentTarget.value })}>
+                    {['hot', 'new', 'top'].map((x, i) => <option value={x} key={i}> {x} </option>)}
+                </select>
+                {state.subreddit_sort === 'top' && <>
+                    <select defaultValue={state.subreddit_sort_range} onChange={e => updateState({ subreddit_sort_range: e.currentTarget.value })}>
+                        {['hour', 'day', 'week', 'month', 'year'].map((x, i) => <option value={x} key={i}> {x} </option>)}
+                    </select>
+                </>}
+            </div>
+            {/* @ts-ignore */}
+            <Kind data={state?.selected_subreddit_posts?.data} kind={state?.selected_subreddit_posts?.kind} />
         </div>
     </>
 }
 
-function Subreddit() {
+function ViewPost({ state, updateState }: Props) {
 
-    let { sub } = useParams()
-    let [posts, setPosts] = useState<any>()
+    let { permalink } = useParams()
+    let [post, setPost] = useState<any>()
+    let [loading, setLoading] = useState<boolean>(true)
 
     useEffect(() => {
-        Reddit.getPosts(sub || 'all').then(x => setPosts(x))
-    }, [sub])
+        setLoading(true)
+        Reddit.post(permalink!, state.post_sort).then(x => { setPost(x); setLoading(false) })
+    }, [permalink, state.post_sort])
 
     return <>
         <div className='col'>
-            <Kind data={posts?.data} kind={posts?.kind} />
+            <Kind kind={post?.[0]?.kind} data={post?.[0]?.data} />
+            <div className='row'>
+                <select defaultValue={state.post_sort} onChange={e => updateState({ post_sort: e.currentTarget.value })}>
+                    {['best', 'top', 'new', 'controversial'].map((x, i) => <option value={x} key={i}> {x} </option>)}
+                </select>
+            </div>
+            {loading ? <div className='spinner'></div> : <Kind kind={post?.[1]?.kind} data={post?.[1]?.data} />}
         </div>
     </>
 }
@@ -84,11 +122,13 @@ function Listing({ data }: any) {
 
 function Post({ data }: any) {
     return <>
-        <Link to={data?.permalink} className='row bg-stone-800 p-4'>
+        <Link to={`/${data?.permalink?.replaceAll('/', '-')}`} className='row bg p-4'>
             <div className='col'>
-                <div className='row text-stone-400 space-x-2'>
+                <div className='row subtext text-sm space-x-2'>
+                    <div> {data?.score} </div>
                     <div> r/{data?.subreddit} </div>
                     <div> u/{data?.author} </div>
+                    <div> {new Date(data?.created * 1000).toLocaleString()} </div>
                 </div>
                 <div className='row'>
                     <div> {data?.title} </div>
@@ -103,13 +143,14 @@ function Comment({ data }: any) {
     let [fold, setFold] = useState<boolean>(false)
 
     return <>
-        <div className='bg-stone-800 border-l-[0.5px] border-stone-400 pl-2'>
+        <div className='bg border-l-[0.5px] border-stone-400 pl-2'>
             <div className='p-2'>
-                <div className='row text-stone-400 text-sm space-x-2'>
+                <div onClick={() => setFold(!fold)} className='row subtext text-sm space-x-2'>
                     <div> u/{data?.author} </div>
                     <div> {data?.score} </div>
+                    <div> {new Date(data?.created * 1000).toLocaleString()} </div>
                 </div>
-                <div onClick={() => setFold(!fold)}> {data?.body} </div>
+                {!fold && <MarkDown >{data?.body}</MarkDown>}
             </div>
             {(data?.replies && !fold) && <Kind data={data?.replies?.data} kind={data?.replies?.kind} />}
         </div>

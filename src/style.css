@@ -19,3 +19,56 @@
 body {
     @apply bg-stone-900 text-white
 }
+
+.bg {
+    @apply bg-stone-800
+}
+
+select {
+    @apply bg p-4 outline-none
+}
+
+input {
+    @apply bg p-4 outline-none w-full
+}
+
+.subtext {
+    @apply text-stone-400
+}
+
+p > a {
+    @apply subtext
+}
+
+/* Spinner */
+
+.spinner {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+}
+
+.spinner:after {
+    content: " ";
+    display: block;
+    width: 64px;
+    height: 64px;
+    margin: 8px;
+    border-radius: 50%;
+    border: 6px solid #fff;
+    border-color: #fff transparent #fff transparent;
+    animation: spinner 1.2s linear infinite;
+}
+
+@keyframes spinner {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/*  */
