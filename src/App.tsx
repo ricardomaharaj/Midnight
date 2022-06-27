@@ -30,7 +30,7 @@ export function App() {
     return <>
         <BrowserRouter>
             <div className='container mx-auto'>
-                <Link to='/' className='p-8 text-center text-2xl'>
+                <Link to='/' className='p-2 text-center text-2xl'>
                     <div> Rapid Reddit </div>
                 </Link>
                 <Routes>
@@ -128,7 +128,7 @@ function Post({ data }: any) {
                     <div> {data?.score} </div>
                     <div> r/{data?.subreddit} </div>
                     <div> u/{data?.author} </div>
-                    <div> {new Date(data?.created * 1000).toLocaleString()} </div>
+                    <div> {new Date(data?.created * 1000).toDateString().substring(4, 10)} </div>
                 </div>
                 <div className='row'>
                     <div> {data?.title} </div>
@@ -148,7 +148,7 @@ function Comment({ data }: any) {
                 <div onClick={() => setFold(!fold)} className='row subtext text-sm space-x-2'>
                     <div> u/{data?.author} </div>
                     <div> {data?.score} </div>
-                    <div> {new Date(data?.created * 1000).toLocaleString()} </div>
+                    <div> {new Date(data?.created * 1000).toDateString().substring(4, 10)} </div>
                 </div>
                 {!fold && <MarkDown >{data?.body}</MarkDown>}
             </div>
