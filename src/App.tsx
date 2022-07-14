@@ -3,7 +3,7 @@ import { BrowserRouter, Link, Route, Routes, useParams } from 'react-router-dom'
 import { Reddit } from './Reddit'
 import MarkDown from 'react-markdown'
 
-type GlobalState = {
+type State = {
     selected_subreddit: string
     subreddit_sort: string
     subreddit_sort_range: string,
@@ -12,20 +12,20 @@ type GlobalState = {
 }
 
 type Props = {
-    state: GlobalState
-    updateState: (update: Partial<GlobalState>) => void
+    state: State
+    updateState: (update: Partial<State>) => void
 }
 
 export function App() {
 
-    let [state, setState] = useState<GlobalState>({
+    let [state, setState] = useState<State>({
         selected_subreddit: 'askreddit',
         post_sort: 'top',
         subreddit_sort: 'top',
         subreddit_sort_range: 'week'
     })
 
-    let updateState = (update: Partial<GlobalState>) => { setState({ ...state, ...update }) }
+    let updateState = (update: Partial<State>) => { setState({ ...state, ...update }) }
 
     return <>
         <BrowserRouter>
