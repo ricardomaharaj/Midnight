@@ -42,6 +42,25 @@ export function App() {
     </>
 }
 
+function Kind({ kind, data }: any) {
+    switch (kind) {
+        case 'Listing':
+            return <Listing data={data} />
+        case 't1':
+            return <Comment data={data} />
+        case 't3':
+            return <Post data={data} />
+        default:
+            return <></>
+    }
+}
+
+function Listing({ data }: any) {
+    return <>
+        {data?.children?.map((x: any, i: number) => <Kind key={i} data={x?.data} kind={x?.kind} />)}
+    </>
+}
+
 function Subreddit({ state, updateState }: Props) {
 
     useEffect(() => {
@@ -77,16 +96,59 @@ function Subreddit({ state, updateState }: Props) {
     </>
 }
 
+function Post({ data }: any) {
+
+    let [expanded, setExpanded] = useState(false)
+    let toggle = () => setExpanded(!expanded)
+
+    return <>
+        <div className='col space-y-2 bg p-4'>
+            <Link to={`/${data?.permalink?.replaceAll('/', '-')}`} className='col'>
+                <div className='row flex-wrap subtext text-sm space-x-2'>
+                    <div> {data?.score} </div>
+                    <div> r/{data?.subreddit} </div>
+                    <div> u/{data?.author} </div>
+                    <div> {new Date(data?.created * 1000).toDateString().substring(4, 10)} </div>
+                </div>
+                <div className='row flex-wrap'>
+                    <div> {data?.title} </div>
+                </div>
+            </Link>
+            {data?.thumbnail
+                ? <div className='row'>
+                    {expanded
+                        ? <>
+                            {data?.is_video && <>
+                                <div>
+                                    <video autoPlay controls src={data?.media?.reddit_video?.fallback_url} />
+                                    <span onClick={toggle} className='subtext'> Hide </span>
+                                </div>
+                            </>}
+                            {data?.media?.oembed && <>
+                                <div>
+                                    <div dangerouslySetInnerHTML={{ __html: data?.media?.oembed?.html }} />
+                                    <span onClick={toggle} className='subtext'> Hide </span>
+                                </div>
+                            </>}
+                            {(data?.preview?.images?.[0]?.source?.url && !data?.is_video && !data?.media?.oembed) && <img onClick={toggle} src={data?.preview?.images?.[0]?.source?.url} alt='' className='rounded-xl' />}
+                            {data?.is_gallery && <img src={data?.thumbnail} alt='' className='rounded-xl' />}
+                            {data?.selftext && <div className='col'><MarkDown>{data?.selftext}</MarkDown></div>}
+                        </>
+                        : <img onClick={toggle} src={data?.thumbnail === 'nsfw' ? data?.preview?.images?.[0]?.resolutions?.[0]?.url : data?.thumbnail} alt='' className='rounded-xl' />
+                    }
+                </div>
+                : <> {data?.selftext && <div className='col subtext'><MarkDown>{data?.selftext?.substring(0, 247).padEnd(250, '.')}</MarkDown></div>} </>
+            }
+        </div>
+    </>
+}
+
 function ViewPost({ state, updateState }: Props) {
 
     let { permalink } = useParams()
     let [post, setPost] = useState<any>()
-    let [loading, setLoading] = useState<boolean>(true)
 
-    useEffect(() => {
-        setLoading(true)
-        Reddit.post(permalink!, state.post_sort).then(x => { setPost(x); setLoading(false) })
-    }, [permalink, state.post_sort])
+    useEffect(() => { Reddit.post(permalink!, state.post_sort).then(x => setPost(x)) }, [permalink, state.post_sort])
 
     return <>
         <div className='col'>
@@ -96,51 +158,14 @@ function ViewPost({ state, updateState }: Props) {
                     {['best', 'top', 'new', 'controversial'].map((x, i) => <option value={x} key={i}> {x} </option>)}
                 </select>
             </div>
-            {loading ? <div className='spinner'></div> : <Kind kind={post?.[1]?.kind} data={post?.[1]?.data} />}
+            <Kind kind={post?.[1]?.kind} data={post?.[1]?.data} />
         </div>
-    </>
-}
-
-function Kind({ kind, data }: any) {
-    switch (kind) {
-        case 'Listing':
-            return <Listing data={data} />
-        case 't1':
-            return <Comment data={data} />
-        case 't3':
-            return <Post data={data} />
-        default:
-            return <></>
-    }
-}
-
-function Listing({ data }: any) {
-    return <>
-        {data?.children?.map((x: any, i: number) => <Kind key={i} data={x?.data} kind={x?.kind} />)}
-    </>
-}
-
-function Post({ data }: any) {
-    return <>
-        <Link to={`/${data?.permalink?.replaceAll('/', '-')}`} className='row bg p-4'>
-            <div className='col'>
-                <div className='row subtext text-sm space-x-2'>
-                    <div> {data?.score} </div>
-                    <div> r/{data?.subreddit} </div>
-                    <div> u/{data?.author} </div>
-                    <div> {new Date(data?.created * 1000).toDateString().substring(4, 10)} </div>
-                </div>
-                <div className='row'>
-                    <div> {data?.title} </div>
-                </div>
-            </div>
-        </Link>
     </>
 }
 
 function Comment({ data }: any) {
 
-    let [fold, setFold] = useState<boolean>(false)
+    let [fold, setFold] = useState(false)
 
     return <>
         <div className='bg border-l-[0.5px] border-stone-400 pl-2'>
@@ -150,7 +175,7 @@ function Comment({ data }: any) {
                     <div> {data?.score} </div>
                     <div> {new Date(data?.created * 1000).toDateString().substring(4, 10)} </div>
                 </div>
-                {!fold && <MarkDown >{data?.body}</MarkDown>}
+                {!fold && <MarkDown>{data?.body}</MarkDown>}
             </div>
             {(data?.replies && !fold) && <Kind data={data?.replies?.data} kind={data?.replies?.kind} />}
         </div>
