@@ -35,7 +35,7 @@ export function App() {
                 </Link>
                 <Routes>
                     <Route path='/' element={<Subreddit state={state} updateState={updateState} />} />
-                    <Route path='/:permalink' element={<ViewPost state={state} updateState={updateState} />} />
+                    <Route path='/:id' element={<ViewPost state={state} updateState={updateState} />} />
                 </Routes>
             </div>
         </BrowserRouter>
@@ -103,7 +103,7 @@ function Post({ data }: any) {
 
     return <>
         <div className='col space-y-2 bg p-4'>
-            <Link to={`/${data?.permalink?.replaceAll('/', '-')}`} className='col'>
+            <Link to={`/${data?.id}`} className='col'>
                 <div className='row flex-wrap subtext text-sm space-x-2'>
                     <div> {data?.score} </div>
                     <div> r/{data?.subreddit} </div>
@@ -117,47 +117,96 @@ function Post({ data }: any) {
             {data?.thumbnail
                 ? <div className='row'>
                     {expanded
-                        ? <>
-                            {data?.is_video && <>
-                                <div>
-                                    <video autoPlay controls src={data?.media?.reddit_video?.fallback_url} />
-                                    <span onClick={toggle} className='subtext'> Hide </span>
-                                </div>
-                            </>}
-                            {data?.media?.oembed && <>
-                                <div>
-                                    <div dangerouslySetInnerHTML={{ __html: data?.media?.oembed?.html }} />
-                                    <span onClick={toggle} className='subtext'> Hide </span>
-                                </div>
-                            </>}
-                            {(data?.preview?.images?.[0]?.source?.url && !data?.is_video && !data?.media?.oembed) && <img onClick={toggle} src={data?.preview?.images?.[0]?.source?.url} alt='' className='rounded-xl' />}
-                            {data?.is_gallery && <img src={data?.thumbnail} alt='' className='rounded-xl' />}
-                            {data?.selftext && <div className='col'><MarkDown>{data?.selftext}</MarkDown></div>}
-                        </>
-                        : <img onClick={toggle} src={data?.thumbnail === 'nsfw' ? data?.preview?.images?.[0]?.resolutions?.[0]?.url : data?.thumbnail} alt='' className='rounded-xl' />
+                        ? <ThumbnailHandler data={data} toggle={toggle} />
+                        : <img onClick={toggle} src={
+                            (data?.thumbnail === 'nsfw' || data?.thumbnail === 'spoiler') ? data?.preview?.images?.[0]?.resolutions?.[0]?.url : data?.thumbnail
+                        } alt='' className='rounded-xl' />
                     }
                 </div>
-                : <> {data?.selftext && <div className='col subtext'><MarkDown>{data?.selftext?.substring(0, 247).padEnd(250, '.')}</MarkDown></div>} </>
+                : <> {data?.selftext && <div className='col subtext'><MarkDown>{data?.selftext > 250 ? data?.selftext?.substring(0, (250 - 3)).padEnd(250, '.') : data?.selftext}</MarkDown></div>} </>
             }
         </div>
     </>
 }
 
+function ThumbnailHandler({ data, toggle }: any) {
+    if (data?.is_video) {
+        return <>
+            <div>
+                <video autoPlay controls src={data?.media?.reddit_video?.fallback_url} />
+                <span onClick={toggle} className='subtext'> Hide </span>
+            </div>
+        </>
+    }
+
+    if (data?.url) {
+        if (`${data?.url}`.endsWith('.gif')) {
+            return <>
+                <img onClick={toggle} src={data?.preview?.images?.[0]?.variants?.gif?.source?.url} />
+            </>
+        }
+    }
+
+    if (`${data?.url}`.endsWith('gifv')) {
+        return <>
+            <div>
+                <video autoPlay controls src={`${data?.url}`.replace('.gifv', '.mp4')} />
+                <span onClick={toggle} className='subtext'> Hide </span>
+            </div>
+        </>
+    }
+
+    if (data?.media?.oembed) {
+        return <>
+            <div>
+                <div dangerouslySetInnerHTML={{ __html: data?.media?.oembed?.html }} />
+                <span onClick={toggle} className='subtext'> Hide </span>
+            </div>
+        </>
+    }
+
+    if (data?.preview?.images?.[0]?.source?.url) {
+        return <>
+            <img onClick={toggle} src={data?.preview?.images?.[0]?.source?.url} alt='' className='rounded-xl' />
+        </>
+    }
+
+    if (data?.is_gallery) {
+        return <>
+            <img src={data?.thumbnail} alt='' className='rounded-xl' />
+        </>
+    }
+
+    if (data?.is_self) {
+        return <>
+            <div className='col'>
+                <MarkDown>{data?.selftext}</MarkDown>
+            </div>
+        </>
+    }
+
+    return <></>
+}
+
 function ViewPost({ state, updateState }: Props) {
 
-    let { permalink } = useParams()
+    let { id } = useParams()
     let [post, setPost] = useState<any>()
 
-    useEffect(() => { Reddit.post(permalink!, state.post_sort).then(x => setPost(x)) }, [permalink, state.post_sort])
+    useEffect(() => { Reddit.post(id!, state.post_sort).then(x => setPost(x)) }, [id, state.post_sort])
 
     return <>
         <div className='col'>
             <Kind kind={post?.[0]?.kind} data={post?.[0]?.data} />
-            <div className='row'>
-                <select defaultValue={state.post_sort} onChange={e => updateState({ post_sort: e.currentTarget.value })}>
-                    {['best', 'top', 'new', 'controversial'].map((x, i) => <option value={x} key={i}> {x} </option>)}
-                </select>
-            </div>
+            {post
+                ? <>
+                    <div className='row'>
+                        <select defaultValue={state.post_sort} onChange={e => updateState({ post_sort: e.currentTarget.value })}>
+                            {['best', 'top', 'new', 'controversial'].map((x, i) => <option value={x} key={i}> {x} </option>)}
+                        </select>
+                    </div>
+                </>
+                : <div className='loader'></div>}
             <Kind kind={post?.[1]?.kind} data={post?.[1]?.data} />
         </div>
     </>
@@ -165,7 +214,7 @@ function ViewPost({ state, updateState }: Props) {
 
 function Comment({ data }: any) {
 
-    let [fold, setFold] = useState(false)
+    let [fold, setFold] = useState(data?.stickied ? true : false)
 
     return <>
         <div className='bg border-l-[0.5px] border-stone-400 pl-2'>

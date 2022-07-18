@@ -21,8 +21,7 @@ export const Reddit = {
         let x = await axios.get(url, { params })
         return x.data
     },
-    post: async function (permalink: string, sort: string) {
-        permalink = permalink.replaceAll('-', '/')
+    post: async function (id: string, sort: string) {
         let params
         if (sort !== 'best') {
             params = {
@@ -34,7 +33,7 @@ export const Reddit = {
                 raw_json: 1
             }
         }
-        let x = await axios.get(`https://www.reddit.com/${permalink}.json`, { params })
+        let x = await axios.get(`https://www.reddit.com/${id}.json`, { params })
         return x.data
     }
 }
