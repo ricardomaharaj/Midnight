@@ -79,7 +79,7 @@ function Subreddit({ state, updateState }: Props) {
         <div className='col'>
             <div className='row'>
                 <input type='text' defaultValue={state.selected_subreddit} onKeyDown={
-                    e => e.key === 'Enter' ? updateState({ selected_subreddit: e.currentTarget.value }) : null
+                    e => e.key === 'Enter' ? updateState({ selected_subreddit: e.currentTarget.value.replaceAll(' ', '') }) : null
                 } />
                 <select defaultValue={state.subreddit_sort} onChange={e => updateState({ subreddit_sort: e.currentTarget.value })}>
                     {['hot', 'new', 'top'].map((x, i) => <option value={x} key={i}> {x} </option>)}
