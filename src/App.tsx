@@ -30,8 +30,8 @@ export function App() {
     return <>
         <BrowserRouter>
             <div className='container mx-auto'>
-                <Link to='/' className='p-2 text-center text-2xl'>
-                    <div> Rapid Reddit </div>
+                <Link to='/' className=''>
+                    <div className='p-8 w-full text-center text-2xl'> Rapid Reddit </div>
                 </Link>
                 <Routes>
                     <Route path='/' element={<Subreddit state={state} updateState={updateState} />} />
