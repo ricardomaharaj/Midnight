@@ -19,9 +19,9 @@ type Props = {
 export function App() {
 
     let [state, setState] = useState<State>({
-        selected_subreddit: 'askreddit',
+        selected_subreddit: 'all',
         post_sort: 'top',
-        subreddit_sort: 'top',
+        subreddit_sort: 'hot',
         subreddit_sort_range: 'week'
     })
 
@@ -119,17 +119,24 @@ function Post({ data }: any) {
                     {expanded
                         ? <ThumbnailHandler data={data} toggle={toggle} />
                         : <img onClick={toggle} src={
-                            (data?.thumbnail === 'nsfw' || data?.thumbnail === 'spoiler') ? data?.preview?.images?.[0]?.resolutions?.[0]?.url : data?.thumbnail
+                            (data?.thumbnail === 'nsfw' || data?.thumbnail === 'spoiler') ? data?.preview?.images?.[0]?.resolutions?.[0]?.url : data.thumbnail
                         } alt='' className='rounded-xl' />
                     }
                 </div>
-                : <> {data?.selftext && <div className='col subtext'><MarkDown>{data?.selftext > 250 ? data?.selftext?.substring(0, (250 - 3)).padEnd(250, '.') : data?.selftext}</MarkDown></div>} </>
+                : <> {data?.selftext && <div className={expanded ? '' : 'subtext'} onClick={toggle}>
+                    {expanded
+                        ? <MarkDown>{data?.selftext}</MarkDown>
+                        : <MarkDown>{data?.selftext?.length > 300 ? data?.selftext?.substring(0, 250 - 3).padEnd(250, '.') : data?.selftext}</MarkDown>
+                    }
+                </div>}
+                </>
             }
         </div>
     </>
 }
 
 function ThumbnailHandler({ data, toggle }: any) {
+
     if (data?.is_video) {
         return <>
             <div>
@@ -147,7 +154,7 @@ function ThumbnailHandler({ data, toggle }: any) {
         }
     }
 
-    if (`${data?.url}`.endsWith('gifv')) {
+    if (`${data?.url}`.endsWith('.gifv')) {
         return <>
             <div>
                 <video autoPlay controls src={`${data?.url}`.replace('.gifv', '.mp4')} />
