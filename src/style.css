@@ -24,20 +24,8 @@ body {
     @apply bg-stone-800
 }
 
-select {
-    @apply bg p-4 outline-none
-}
-
-input {
-    @apply bg p-4 outline-none w-full
-}
-
-.subtext {
-    @apply text-stone-400
-}
-
 p>a {
-    @apply subtext
+    @apply text-stone-400
 }
 
 .loader,
