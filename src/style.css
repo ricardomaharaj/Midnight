@@ -9,24 +9,26 @@
 }
 
 .row {
-    @apply flex flex-row
+    @apply flex flex-row;
 }
 
 .col {
-    @apply flex flex-col
+    @apply flex flex-col;
 }
 
 body {
-    @apply bg-stone-900 text-white
+    @apply bg-stone-900 text-white;
 }
 
 .bg {
-    @apply bg-stone-800
+    @apply bg-stone-800;
 }
 
-p>a {
-    @apply text-stone-400
+p > a {
+    @apply text-stone-400;
 }
+
+/* loader */
 
 .loader,
 .loader:after {
