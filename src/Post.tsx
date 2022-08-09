@@ -38,6 +38,9 @@ export function Post() {
                                 <span>{header.title}</span>
                             </a>
                         </div>
+                        {header?.is_self && (
+                            <MarkDown children={header?.selftext} />
+                        )}
                         <div className='row'>
                             {['new', 'hot', 'top', 'controversial'].map(
                                 (x, i) => (

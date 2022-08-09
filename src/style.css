@@ -20,6 +20,10 @@ body {
     @apply bg-stone-900 text-white;
 }
 
+p > a {
+    @apply text-stone-400;
+}
+
 /* loader */
 
 .loader,
