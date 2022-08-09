@@ -27,7 +27,7 @@ export function Post() {
                                 r/{header.subreddit}
                             </Link>
                             <span>{header.author}</span>
-                            <span>
+                            <span className='text-xs'>
                                 {new Date(
                                     header.created_utc * 1000
                                 ).toDateString()}
@@ -103,7 +103,7 @@ function Comment({ data }: any) {
                     >
                         <span>{data?.score}</span>
                         <span>u/{data?.author}</span>
-                        <span>
+                        <span className='text-xs'>
                             {new Date(data?.created_utc * 1000).toDateString()}
                         </span>
                     </div>
