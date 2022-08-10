@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom'
 import { useSubreddit } from './Reddit'
+import { dateFromNow } from './util'
 
 export function Subreddit() {
     let { subreddit } = useParams()
     if (!subreddit) subreddit = 'all'
     let [params, setParams] = useSearchParams()
-    let [edit, setEdit] = useState(false)
+    let [subEdit, setSubEdit] = useState(false)
     let nav = useNavigate()
 
     let sort = params.get('sort')
@@ -27,10 +28,10 @@ export function Subreddit() {
     return (
         <>
             <div className='col'>
-                {edit ? (
+                {subEdit ? (
                     <input
                         type='text'
-                        className='outline-none bg-stone-900'
+                        className='outline-none bg-stone-900 text-xl w-full text-center'
                         placeholder='subreddit'
                         onKeyDown={(e) => {
                             if (e.key === 'Enter') {
@@ -40,14 +41,14 @@ export function Subreddit() {
                                         ''
                                     )}`
                                 )
-                                setEdit(false)
+                                setSubEdit(false)
                             }
                         }}
                     />
                 ) : (
                     <div
                         className='row text-lg justify-center'
-                        onClick={() => setEdit(true)}
+                        onClick={() => setSubEdit(true)}
                     >
                         r/{subreddit}
                     </div>
@@ -109,9 +110,7 @@ export function Subreddit() {
                                         </Link>
                                         <span>u/{data?.author}</span>
                                         <span className='text-xs'>
-                                            {new Date(
-                                                data?.created_utc * 1000
-                                            ).toDateString()}
+                                            {dateFromNow(data?.created_utc)}
                                         </span>
                                     </div>
                                     <div className='row'>

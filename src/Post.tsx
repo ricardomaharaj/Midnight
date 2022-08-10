@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { usePost } from './Reddit'
 import MarkDown from 'react-markdown'
+import { dateFromNow } from './util'
 
 export function Post() {
     let { id } = useParams()
@@ -28,9 +29,7 @@ export function Post() {
                             </Link>
                             <span>{header.author}</span>
                             <span className='text-xs'>
-                                {new Date(
-                                    header.created_utc * 1000
-                                ).toDateString()}
+                                {dateFromNow(header?.created_utc)}
                             </span>
                         </div>
                         <div className='row'>
@@ -104,7 +103,7 @@ function Comment({ data }: any) {
                         <span>{data?.score}</span>
                         <span>u/{data?.author}</span>
                         <span className='text-xs'>
-                            {new Date(data?.created_utc * 1000).toDateString()}
+                            {dateFromNow(data?.created_utc)}
                         </span>
                     </div>
                     {!fold && <MarkDown children={data?.body} />}
