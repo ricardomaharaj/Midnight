@@ -3,6 +3,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom'
 import { usePost } from './Reddit'
 import MarkDown from 'react-markdown'
 import { dateFromNow } from './util'
+import { Thumbnail } from './Subreddit'
 
 export function Post() {
     let { id } = useParams()
@@ -33,10 +34,25 @@ export function Post() {
                             </span>
                         </div>
                         <div className='row'>
-                            <a href={header?.url} target='_blank'>
-                                <span>{header.title}</span>
-                            </a>
+                            {header?.crosspost_parent_list?.[0] ? (
+                                <>
+                                    <Link
+                                        to={`/r/${header?.crosspost_parent_list?.[0]?.subreddit}/${header?.crosspost_parent_list?.[0]?.id}`}
+                                    >
+                                        <span className='underline'>
+                                            {header.title}
+                                        </span>
+                                    </Link>
+                                </>
+                            ) : (
+                                <a href={header?.url} target='_blank'>
+                                    <span className='underline'>
+                                        {header.title}
+                                    </span>
+                                </a>
+                            )}
                         </div>
+                        {header?.thumbnail && <Thumbnail data={header} />}
                         {header?.is_self && (
                             <MarkDown children={header?.selftext} />
                         )}

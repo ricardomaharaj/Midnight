@@ -138,7 +138,7 @@ export function Subreddit() {
     )
 }
 
-function Thumbnail({ data }: any) {
+export function Thumbnail({ data }: any) {
     let { thumbnail } = data
     let url = getMediaUrl(data)
     if (thumbnail) {
@@ -169,6 +169,10 @@ function getMediaUrl(data: any) {
     }
     if (data?.preview?.reddit_video_preview?.fallback_url) {
         return data?.preview?.reddit_video_preview?.fallback_url
+    }
+    if (data?.crosspost_parent_list?.[0]?.media.reddit_video?.fallback_url) {
+        return data?.crosspost_parent_list?.[0]?.media.reddit_video
+            ?.fallback_url
     }
     return data?.url
 }
