@@ -1,5 +1,11 @@
-# Rapid Reddit
+# Midnight
 
-Reddit client for desktop and mobile
+A minimal reddit experience
 
-https://rapid-reddit.netlify.app/
+### Features
+
+- Minimal UI and metadata for distraction-free reading
+- GraphQL Urql caching for quick reloading
+- PWA for installing and instant loading on revisits
+
+https://r8r-midnight.netlify.app/
